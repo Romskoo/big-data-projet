@@ -18,7 +18,7 @@ def patient_to_json(patient):
         if model is None:
             patient_json['aliveProba'] = "?"
         else:
-            patient_json['aliveProba'] = model.predict_proba(patient.to_predictable_array())[0, 0]
+            patient_json['aliveProba'] = round(model.predict_proba(patient.to_predictable_array())[0, 0], 2)
     else:
         if patient.state == 'MORT':
             patient_json['aliveProba'] = 0
