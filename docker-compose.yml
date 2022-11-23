@@ -1,0 +1,82 @@
+version: '3.7'
+services:
+  web:
+    container_name: gmd_web
+    build: ./front
+    restart: always
+    volumes:
+      - ./front/src:/app/src:rw
+    command: npm run start
+    environment:
+      - WATCHPACK_POLLING=true
+    ports:
+      - published: 3000
+        target: 3000
+    networks:
+      - gmd_network
+    depends_on:
+      - api
+  api:
+    container_name: gmd_api
+    build: ./api
+    restart: always
+    ports:
+      - published: 5000
+        target: 5000
+    volumes:
+      - ./api:/code/api:rw
+      - ./ml:/ml:rw
+      - ./scripts/fill-data:/scripts/fill-data:rw
+    environment:
+      FLASK_DEBUG: "True"
+      FLASK_POSTGRES_DB: ${POSTGRES_DB}
+      FLASK_POSTGRES_HOST: ${POSTGRES_CONTAINER_NAME}
+      FLASK_POSTGRES_USER: ${POSTGRES_USER}
+      FLASK_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FLASK_ELASTIC_USER: ${ELASTIC_USERNAME}
+      FLASK_ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      FLASK_ELASTIC_HOST: ${ELASTIC_CONTAINER_NAME}
+    entrypoint: [ "bash", "-c", "python3 ./scripts/fill-data/script.py && python3 ./code/api/flaskapi.py" ]
+    depends_on:
+      - postgres
+      - elasticsearch
+    networks:
+      - gmd_network
+  postgres:
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    image: postgres:latest
+    ports:
+      - published: 5440
+        target: 5432
+    restart: unless-stopped
+    networks:
+      - gmd_network
+    volumes:
+      - gmd_postgres_data:/var/lib/postgresql/data:rw
+      - ./scripts/init-sql.sql:/docker-entrypoint-initdb.d/init.sql:rw
+  elasticsearch:
+    container_name: ${ELASTIC_CONTAINER_NAME}
+    image: elasticsearch:7.17.6
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: 'true'
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+    ports:
+      - published: 9200
+        target: 9200
+      - published: 9300
+        target: 9300
+    networks:
+      - gmd_network
+    volumes:
+      - gmd_elastic_data:/usr/share/elasticsearch/data:rw
+
+volumes:
+  gmd_postgres_data: { }
+  gmd_elastic_data: { }
+networks:
+  gmd_network: { }

@@ -1,0 +1,4 @@
+venv/
+.idea/
+Machine-Learning/
+ml/model.pickle

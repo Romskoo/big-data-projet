@@ -1,0 +1,45 @@
+.form-info {
+    display: flex;
+    flex-direction: column !important;
+    padding-right: 50px;
+    gap: 20px;
+
+}
+
+.form-info .MuiFormControl-root {
+
+    width: fit-content !important;
+
+}
+
+.form-info label {
+    font-size: 1rem;
+    margin-bottom: 7px;
+}
+
+.form-info span {
+    font-weight: 700;
+}
+
+.MuiInputBase-adornedEnd {
+    justify-content: space-between;
+}
+
+.gender {
+    justify-content: center;
+    gap: 30px;
+    width: 200px;
+}
+
+.disease {
+    padding-left: 30px;
+
+}
+
+.disease span {
+        font-weight: normal !important;
+}
+
+.validator {
+    text-align: center;
+}
